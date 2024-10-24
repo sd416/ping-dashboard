@@ -21,7 +21,13 @@ function processData(metrics) {
 
   // Collect all unique source and target regions
   metrics.forEach(metric => {
-    const { source_region, target_region, avg_latency, tcp_bitrate, udp_bitrate } = metric;
+    const { 
+      source_region, 
+      target_region, 
+      avg_latency, 
+      avg_tcp_bitrate, 
+      avg_udp_bitrate 
+    } = metric;
 
     sourcesSet.add(source_region);
     targetsSet.add(target_region);
@@ -30,11 +36,11 @@ function processData(metrics) {
       dataMap[source_region] = {};
     }
 
-    // Store the three values in the dataMap
+    // Store the values in the dataMap
     dataMap[source_region][target_region] = {
       avg_latency: avg_latency || null,
-      tcp_bitrate: tcp_bitrate || null,
-      udp_bitrate: udp_bitrate || null
+      tcp_bitrate: avg_tcp_bitrate || null,
+      udp_bitrate: avg_udp_bitrate || null
     };
   });
 
