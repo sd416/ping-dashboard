@@ -1,0 +1,70 @@
+/* styles.css */
+body {
+  font-family: Arial, sans-serif;
+  margin: 20px;
+}
+
+h1 {
+  text-align: center;
+}
+
+.controls {
+  margin-bottom: 20px;
+  text-align: center;
+}
+
+label {
+  font-weight: bold;
+  margin-right: 10px;
+}
+
+#table-container {
+  overflow-x: auto;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  table-layout: fixed;
+}
+
+thead, th, td {
+  border: 1px solid #ccc;
+  text-align: center;
+  padding: 8px;
+  word-wrap: break-word;
+}
+
+th {
+  background-color: #f4f4f4;
+}
+
+td {
+  background-color: #fafafa;
+}
+
+td.good {
+  background-color: #d4edda;
+}
+
+td.average {
+  background-color: #fff3cd;
+}
+
+td.poor {
+  background-color: #f8d7da;
+}
+
+.loading {
+  text-align: center;
+  font-size: 18px;
+  margin-top: 20px;
+}
+
+.error {
+  color: red;
+  text-align: center;
+  font-size: 18px;
+  margin-top: 20px;
+}
+

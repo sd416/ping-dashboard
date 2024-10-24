@@ -1,0 +1,140 @@
+// script.js
+
+const API_URL = 'https://your-worker-url/metrics'; // Replace with your actual Cloudflare Worker URL
+
+async function fetchMetrics(timeRange) {
+  try {
+    const response = await fetch(`${API_URL}?timeRange=${encodeURIComponent(timeRange)}`);
+    if (!response.ok) {
+      throw new Error(`Error fetching metrics: ${response.statusText}`);
+    }
+    const data = await response.json();
+    return data.results || data; // Adjust based on your API's response structure
+  } catch (error) {
+    console.error('Fetch Metrics Error:', error);
+    throw error;
+  }
+}
+
+function processData(metrics) {
+  const sources = new Set();
+  const targets = new Set();
+  const dataMap = {};
+
+  metrics.forEach(metric => {
+    const { source_region, target_region, avg_latency } = metric;
+
+    sources.add(source_region);
+    targets.add(target_region);
+
+    if (!dataMap[source_region]) {
+      dataMap[source_region] = {};
+    }
+    dataMap[source_region][target_region] = avg_latency; // or any other metric
+  });
+
+  return {
+    sources: Array.from(sources).sort(),
+    targets: Array.from(targets).sort(),
+    dataMap
+  };
+}
+
+function getLatencyClass(latency) {
+  if (latency <= 100) return 'good';
+  if (latency <= 200) return 'average';
+  return 'poor';
+}
+
+function renderTable(sources, targets, dataMap) {
+  const container = document.getElementById('table-container');
+  container.innerHTML = ''; // Clear previous content
+
+  if (sources.length === 0 || targets.length === 0) {
+    container.innerHTML = '<p>No data available for the selected time range.</p>';
+    return;
+  }
+
+  const table = document.createElement('table');
+
+  // Create table header
+  const thead = document.createElement('thead');
+  const headerRow = document.createElement('tr');
+
+  // Empty top-left cell
+  const emptyCell = document.createElement('th');
+  emptyCell.innerText = 'Source \\ Target';
+  headerRow.appendChild(emptyCell);
+
+  // Add target regions to header
+  targets.forEach(target => {
+    const th = document.createElement('th');
+    th.innerText = target;
+    headerRow.appendChild(th);
+  });
+  thead.appendChild(headerRow);
+  table.appendChild(thead);
+
+  // Create table body
+  const tbody = document.createElement('tbody');
+
+  sources.forEach(source => {
+    const row = document.createElement('tr');
+
+    // Source region cell
+    const sourceCell = document.createElement('th');
+    sourceCell.innerText = source;
+    row.appendChild(sourceCell);
+
+    // Data cells
+    targets.forEach(target => {
+      const cell = document.createElement('td');
+      const value = dataMap[source]?.[target];
+
+      if (value !== undefined && value !== null) {
+        cell.innerText = value.toFixed(2); // Adjust as needed
+        cell.classList.add(getLatencyClass(value));
+      } else {
+        cell.innerText = '-';
+      }
+      row.appendChild(cell);
+    });
+
+    tbody.appendChild(row);
+  });
+
+  table.appendChild(tbody);
+  container.appendChild(table);
+}
+
+async function updateDashboard() {
+  const timeRangeSelect = document.getElementById('timeRange');
+  const timeRange = timeRangeSelect.value;
+
+  // Map '5m' to a time range your API understands
+  const apiTimeRangeMap = {
+    '5m': '5m',
+    '1h': '1h',
+    '6h': '6h',
+    '24h': '24h',
+    '7d': '7d'
+  };
+
+  const container = document.getElementById('table-container');
+  container.innerHTML = '<p class="loading">Loading data...</p>';
+
+  try {
+    const metrics = await fetchMetrics(apiTimeRangeMap[timeRange]);
+    const { sources, targets, dataMap } = processData(metrics);
+    renderTable(sources, targets, dataMap);
+  } catch (error) {
+    container.innerHTML = `<p class="error">Failed to load data: ${error.message}</p>`;
+  }
+}
+
+// Event listener for time range selection
+document.getElementById('timeRange').addEventListener('change', updateDashboard);
+
+// Initial load
+updateDashboard();
+

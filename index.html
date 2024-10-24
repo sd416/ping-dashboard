@@ -1,0 +1,28 @@
+<!-- index.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Connectivity Dashboard</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <h1>Connectivity Dashboard</h1>
+  
+  <!-- Time Range Selector -->
+  <label for="timeRange">Select Time Range:</label>
+  <select id="timeRange">
+    <option value="5m">Last 5 Minutes</option>
+    <option value="1h">Last 1 Hour</option>
+    <option value="6h">Last 6 Hours</option>
+    <option value="24h">Last 24 Hours</option>
+    <option value="7d">Last 7 Days</option>
+  </select>
+  
+  <!-- Table Container -->
+  <div id="table-container"></div>
+
+  <script src="script.js"></script>
+</body>
+</html>
+
