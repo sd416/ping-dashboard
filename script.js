@@ -1,5 +1,5 @@
 
-const API_URL = 'https://https://long-snowflake-cf70.sd-api.workers.dev/metrics'; 
+const API_URL = 'https://long-snowflake-cf70.sd-api.workers.dev/metrics'; 
 
 async function fetchMetrics(timeRange) {
   try {
