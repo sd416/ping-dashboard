@@ -1,6 +1,5 @@
-// script.js
 
-const API_URL = 'https://your-worker-url/metrics'; // Replace with your actual Cloudflare Worker URL
+const API_URL = 'https://https://long-snowflake-cf70.sd-api.workers.dev/metrics'; 
 
 async function fetchMetrics(timeRange) {
   try {
@@ -17,30 +16,47 @@ async function fetchMetrics(timeRange) {
 }
 
 function processData(metrics) {
-  const sources = new Set();
-  const targets = new Set();
+  const sourcesSet = new Set();
+  const targetsSet = new Set();
   const dataMap = {};
 
+  // Collect all unique source and target regions
   metrics.forEach(metric => {
     const { source_region, target_region, avg_latency } = metric;
 
-    sources.add(source_region);
-    targets.add(target_region);
+    sourcesSet.add(source_region);
+    targetsSet.add(target_region);
 
     if (!dataMap[source_region]) {
       dataMap[source_region] = {};
     }
-    dataMap[source_region][target_region] = avg_latency; // or any other metric
+    dataMap[source_region][target_region] = avg_latency;
+  });
+
+  const sources = Array.from(sourcesSet).sort();
+  const targets = Array.from(targetsSet).sort();
+
+  // Ensure that dataMap has entries for all sources and targets
+  sources.forEach(source => {
+    if (!dataMap[source]) {
+      dataMap[source] = {};
+    }
+    targets.forEach(target => {
+      if (!dataMap[source][target]) {
+        dataMap[source][target] = null; // or a default value if desired
+      }
+    });
   });
 
   return {
-    sources: Array.from(sources).sort(),
-    targets: Array.from(targets).sort(),
+    sources,
+    targets,
     dataMap
   };
 }
 
 function getLatencyClass(latency) {
+  if (latency === null) return '';
   if (latency <= 100) return 'good';
   if (latency <= 200) return 'average';
   return 'poor';
@@ -89,10 +105,10 @@ function renderTable(sources, targets, dataMap) {
     // Data cells
     targets.forEach(target => {
       const cell = document.createElement('td');
-      const value = dataMap[source]?.[target];
+      const value = dataMap[source][target];
 
       if (value !== undefined && value !== null) {
-        cell.innerText = value.toFixed(2); // Adjust as needed
+        cell.innerText = value.toFixed(2);
         cell.classList.add(getLatencyClass(value));
       } else {
         cell.innerText = '-';
