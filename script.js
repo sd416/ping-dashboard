@@ -121,12 +121,20 @@ function renderTable(sources, targets, dataMap) {
       if (data) {
         const { avg_latency, tcp_bitrate, udp_bitrate } = data;
 
-        // Format the cell with all three values
-        const latencyText = avg_latency !== null ? `Latency: ${avg_latency.toFixed(2)} ms` : 'Latency: -';
-        const tcpText = tcp_bitrate !== null ? `TCP: ${tcp_bitrate.toFixed(2)} Mbps` : 'TCP: -';
-        const udpText = udp_bitrate !== null ? `UDP: ${udp_bitrate.toFixed(2)} Mbps` : 'UDP: -';
+        // Check if advanced checkbox is checked
+        const showAdvanced = document.getElementById('advanced').checked;
 
-        cell.innerHTML = `<div>${latencyText}</div><div>${tcpText}</div><div>${udpText}</div>`;
+        if (showAdvanced) {
+          // Show all three metrics
+          const latencyText = avg_latency !== null ? `Latency: ${avg_latency.toFixed(2)} ms` : 'Latency: -';
+          const tcpText = tcp_bitrate !== null ? `TCP: ${tcp_bitrate.toFixed(2)} Mbps` : 'TCP: -';
+          const udpText = udp_bitrate !== null ? `UDP: ${udp_bitrate.toFixed(2)} Mbps` : 'UDP: -';
+          cell.innerHTML = `<div>${latencyText}</div><div>${tcpText}</div><div>${udpText}</div>`;
+        } else {
+          // Only show latency
+          const latencyText = avg_latency !== null ? `Latency: ${avg_latency.toFixed(2)} ms` : 'Latency: -';
+          cell.innerHTML = `<div>${latencyText}</div>`;
+        }
 
         // Get the latency class and only add it if it's not empty
         const latencyClass = getLatencyClass(avg_latency);
@@ -151,7 +159,7 @@ async function updateDashboard() {
   const timeRange = timeRangeSelect.value;
 
   const apiTimeRangeMap = {
-    '5m': '5m',
+    '15m': '15m',
     '1h': '1h',
     '6h': '6h',
     '24h': '24h',
@@ -170,8 +178,9 @@ async function updateDashboard() {
   }
 }
 
-// Event listener for time range selection
+// Event listeners for time range selection and advanced checkbox
 document.getElementById('timeRange').addEventListener('change', updateDashboard);
+document.getElementById('advanced').addEventListener('change', updateDashboard);
 
 // Initial load
 updateDashboard();
