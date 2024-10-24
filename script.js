@@ -126,13 +126,13 @@ function renderTable(sources, targets, dataMap) {
 
         if (showAdvanced) {
           // Show all three metrics
-          const latencyText = avg_latency !== null ? `Latency: ${avg_latency.toFixed(2)} ms` : 'Latency: -';
+          const latencyText = avg_latency !== null ? `${avg_latency.toFixed(2)} ms` : '-';
           const tcpText = tcp_bitrate !== null ? `TCP: ${tcp_bitrate.toFixed(2)} Mbps` : 'TCP: -';
           const udpText = udp_bitrate !== null ? `UDP: ${udp_bitrate.toFixed(2)} Mbps` : 'UDP: -';
           cell.innerHTML = `<div>${latencyText}</div><div>${tcpText}</div><div>${udpText}</div>`;
         } else {
-          // Only show latency
-          const latencyText = avg_latency !== null ? `Latency: ${avg_latency.toFixed(2)} ms` : 'Latency: -';
+          // Only show latency without the label
+          const latencyText = avg_latency !== null ? `${avg_latency.toFixed(2)} ms` : '-';
           cell.innerHTML = `<div>${latencyText}</div>`;
         }
 
