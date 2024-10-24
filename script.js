@@ -19,7 +19,6 @@ function processData(metrics) {
   const targetsSet = new Set();
   const dataMap = {};
 
-  // Collect all unique source and target regions
   metrics.forEach(metric => {
     const { 
       source_region, 
@@ -36,7 +35,6 @@ function processData(metrics) {
       dataMap[source_region] = {};
     }
 
-    // Store the values in the dataMap
     dataMap[source_region][target_region] = {
       avg_latency: avg_latency || null,
       tcp_bitrate: avg_tcp_bitrate || null,
@@ -47,7 +45,6 @@ function processData(metrics) {
   const sources = Array.from(sourcesSet).sort();
   const targets = Array.from(targetsSet).sort();
 
-  // Ensure that dataMap has entries for all sources and targets
   sources.forEach(source => {
     if (!dataMap[source]) {
       dataMap[source] = {};
@@ -64,6 +61,14 @@ function processData(metrics) {
     targets,
     dataMap
   };
+}
+
+function formatBitrate(bitrate) {
+  if (bitrate === null) return '-';
+  if (bitrate >= 1000) {
+    return `${(bitrate / 1000).toFixed(2)} Gbps`; // Convert to Gbps if >= 1000 Mbps
+  }
+  return `${bitrate.toFixed(2)} Mbps`; // Keep as Mbps otherwise
 }
 
 function getLatencyClass(latency) {
@@ -84,16 +89,13 @@ function renderTable(sources, targets, dataMap) {
 
   const table = document.createElement('table');
 
-  // Create table header
   const thead = document.createElement('thead');
   const headerRow = document.createElement('tr');
 
-  // Empty top-left cell
   const emptyCell = document.createElement('th');
   emptyCell.innerText = 'Source \\ Target';
   headerRow.appendChild(emptyCell);
 
-  // Add target regions to header
   targets.forEach(target => {
     const th = document.createElement('th');
     th.innerText = target;
@@ -102,18 +104,15 @@ function renderTable(sources, targets, dataMap) {
   thead.appendChild(headerRow);
   table.appendChild(thead);
 
-  // Create table body
   const tbody = document.createElement('tbody');
 
   sources.forEach(source => {
     const row = document.createElement('tr');
 
-    // Source region cell
     const sourceCell = document.createElement('th');
     sourceCell.innerText = source;
     row.appendChild(sourceCell);
 
-    // Data cells
     targets.forEach(target => {
       const cell = document.createElement('td');
       const data = dataMap[source][target];
@@ -121,14 +120,18 @@ function renderTable(sources, targets, dataMap) {
       if (data) {
         const { avg_latency, tcp_bitrate, udp_bitrate } = data;
 
-        // Format the cell with all three values
-        const latencyText = avg_latency !== null ? `Latency: ${avg_latency.toFixed(2)} ms` : 'Latency: -';
-        const tcpText = tcp_bitrate !== null ? `TCP: ${tcp_bitrate.toFixed(2)} Mbps` : 'TCP: -';
-        const udpText = udp_bitrate !== null ? `UDP: ${udp_bitrate.toFixed(2)} Mbps` : 'UDP: -';
+        const showAdvanced = document.getElementById('advanced').checked;
 
-        cell.innerHTML = `<div>${latencyText}</div><div>${tcpText}</div><div>${udpText}</div>`;
+        if (showAdvanced) {
+          const latencyText = avg_latency !== null ? `${avg_latency.toFixed(2)} ms` : '-';
+          const tcpText = formatBitrate(tcp_bitrate);
+          const udpText = formatBitrate(udp_bitrate);
+          cell.innerHTML = `<div>${latencyText}</div><div>TCP: ${tcpText}</div><div>UDP: ${udpText}</div>`;
+        } else {
+          const latencyText = avg_latency !== null ? `${avg_latency.toFixed(2)} ms` : '-';
+          cell.innerHTML = `<div>${latencyText}</div>`;
+        }
 
-        // Get the latency class and only add it if it's not empty
         const latencyClass = getLatencyClass(avg_latency);
         if (latencyClass) {
           cell.classList.add(latencyClass);
@@ -170,8 +173,7 @@ async function updateDashboard() {
   }
 }
 
-// Event listener for time range selection
 document.getElementById('timeRange').addEventListener('change', updateDashboard);
+document.getElementById('advanced').addEventListener('change', updateDashboard);
 
-// Initial load
 updateDashboard();
