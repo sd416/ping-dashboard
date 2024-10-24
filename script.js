@@ -1,4 +1,3 @@
-
 const API_URL = 'https://long-snowflake-cf70.sd-api.workers.dev/metrics'; 
 
 async function fetchMetrics(timeRange) {
@@ -22,7 +21,7 @@ function processData(metrics) {
 
   // Collect all unique source and target regions
   metrics.forEach(metric => {
-    const { source_region, target_region, avg_latency } = metric;
+    const { source_region, target_region, avg_latency, tcp_bitrate, udp_bitrate } = metric;
 
     sourcesSet.add(source_region);
     targetsSet.add(target_region);
@@ -30,7 +29,13 @@ function processData(metrics) {
     if (!dataMap[source_region]) {
       dataMap[source_region] = {};
     }
-    dataMap[source_region][target_region] = avg_latency;
+
+    // Store the three values in the dataMap
+    dataMap[source_region][target_region] = {
+      avg_latency: avg_latency || null,
+      tcp_bitrate: tcp_bitrate || null,
+      udp_bitrate: udp_bitrate || null
+    };
   });
 
   const sources = Array.from(sourcesSet).sort();
@@ -43,7 +48,7 @@ function processData(metrics) {
     }
     targets.forEach(target => {
       if (!dataMap[source][target]) {
-        dataMap[source][target] = null; // or a default value if desired
+        dataMap[source][target] = { avg_latency: null, tcp_bitrate: null, udp_bitrate: null };
       }
     });
   });
@@ -105,11 +110,18 @@ function renderTable(sources, targets, dataMap) {
     // Data cells
     targets.forEach(target => {
       const cell = document.createElement('td');
-      const value = dataMap[source][target];
+      const data = dataMap[source][target];
 
-      if (value !== undefined && value !== null) {
-        cell.innerText = value.toFixed(2);
-        cell.classList.add(getLatencyClass(value));
+      if (data) {
+        const { avg_latency, tcp_bitrate, udp_bitrate } = data;
+
+        // Format the cell with all three values
+        const latencyText = avg_latency !== null ? `Latency: ${avg_latency.toFixed(2)} ms` : 'Latency: -';
+        const tcpText = tcp_bitrate !== null ? `TCP: ${tcp_bitrate.toFixed(2)} Mbps` : 'TCP: -';
+        const udpText = udp_bitrate !== null ? `UDP: ${udp_bitrate.toFixed(2)} Mbps` : 'UDP: -';
+
+        cell.innerHTML = `<div>${latencyText}</div><div>${tcpText}</div><div>${udpText}</div>`;
+        cell.classList.add(getLatencyClass(avg_latency));
       } else {
         cell.innerText = '-';
       }
@@ -127,7 +139,6 @@ async function updateDashboard() {
   const timeRangeSelect = document.getElementById('timeRange');
   const timeRange = timeRangeSelect.value;
 
-  // Map '5m' to a time range your API understands
   const apiTimeRangeMap = {
     '5m': '5m',
     '1h': '1h',
@@ -153,4 +164,3 @@ document.getElementById('timeRange').addEventListener('change', updateDashboard)
 
 // Initial load
 updateDashboard();
-
