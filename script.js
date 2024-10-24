@@ -1,4 +1,4 @@
-const API_URL = 'https://long-snowflake-cf70.sd-api.workers.dev/metrics'; 
+const API_URL = 'https://long-snowflake-cf70.sd-api.workers.dev/metrics';
 
 async function fetchMetrics(timeRange) {
   try {
@@ -121,7 +121,12 @@ function renderTable(sources, targets, dataMap) {
         const udpText = udp_bitrate !== null ? `UDP: ${udp_bitrate.toFixed(2)} Mbps` : 'UDP: -';
 
         cell.innerHTML = `<div>${latencyText}</div><div>${tcpText}</div><div>${udpText}</div>`;
-        cell.classList.add(getLatencyClass(avg_latency));
+
+        // Get the latency class and only add it if it's not empty
+        const latencyClass = getLatencyClass(avg_latency);
+        if (latencyClass) {
+          cell.classList.add(latencyClass);
+        }
       } else {
         cell.innerText = '-';
       }
