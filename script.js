@@ -154,7 +154,7 @@ async function updateDashboard() {
   const timeRange = timeRangeSelect.value;
 
   const apiTimeRangeMap = {
-    '1h': '1h',
+    '3h': '3h',
     '6h': '6h',
     '24h': '24h',
     '7d': '7d'
