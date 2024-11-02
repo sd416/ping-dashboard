@@ -1,8 +1,5 @@
 const API_URL = 'https://long-snowflake-cf70.sd-api.workers.dev/metrics';
 
-let allSources = [];
-let allTargets = [];
-
 async function fetchMetrics(timeRange) {
   try {
     const response = await fetch(`${API_URL}?timeRange=${encodeURIComponent(timeRange)}`);
@@ -15,41 +12,6 @@ async function fetchMetrics(timeRange) {
     console.error('Fetch Metrics Error:', error);
     throw error;
   }
-}
-
-function populateFilters(sources, targets) {
-  const sourceFilter = document.getElementById('sourceFilter');
-  const targetFilter = document.getElementById('targetFilter');
-
-  // Clear existing options
-  sourceFilter.innerHTML = '';
-  targetFilter.innerHTML = '';
-
-  // Populate source filter
-  sources.forEach(source => {
-    const option = document.createElement('option');
-    option.value = source;
-    option.text = source;
-    sourceFilter.appendChild(option);
-  });
-
-  // Populate target filter
-  targets.forEach(target => {
-    const option = document.createElement('option');
-    option.value = target;
-    option.text = target;
-    targetFilter.appendChild(option);
-  });
-}
-
-function getSelectedOptions(selectElement) {
-  const selected = [];
-  for (const option of selectElement.options) {
-    if (option.selected) {
-      selected.push(option.value);
-    }
-  }
-  return selected;
 }
 
 function processData(metrics) {
@@ -82,10 +44,6 @@ function processData(metrics) {
 
   const sources = Array.from(sourcesSet).sort();
   const targets = Array.from(targetsSet).sort();
-
-  // Store all sources and targets globally for filter options
-  allSources = sources;
-  allTargets = targets;
 
   sources.forEach(source => {
     if (!dataMap[source]) {
@@ -125,7 +83,7 @@ function renderTable(sources, targets, dataMap) {
   container.innerHTML = ''; // Clear previous content
 
   if (sources.length === 0 || targets.length === 0) {
-    container.innerHTML = '<p>No data available for the selected time range or filters.</p>';
+    container.innerHTML = '<p>No data available for the selected time range.</p>';
     return;
   }
 
@@ -208,34 +166,13 @@ async function updateDashboard() {
   try {
     const metrics = await fetchMetrics(apiTimeRangeMap[timeRange]);
     const { sources, targets, dataMap } = processData(metrics);
-
-    // Populate filter options only once
-    if (allSources.length === 0 && allTargets.length === 0) {
-      populateFilters(sources, targets);
-    }
-
-    // Get selected filters
-    const sourceFilter = document.getElementById('sourceFilter');
-    const targetFilter = document.getElementById('targetFilter');
-
-    const selectedSources = getSelectedOptions(sourceFilter);
-    const selectedTargets = getSelectedOptions(targetFilter);
-
-    const filteredSources = selectedSources.length > 0 ? selectedSources : sources;
-    const filteredTargets = selectedTargets.length > 0 ? selectedTargets : targets;
-
-    // Render the table with filtered data
-    renderTable(filteredSources, filteredTargets, dataMap);
+    renderTable(sources, targets, dataMap);
   } catch (error) {
     container.innerHTML = `<p class="error">Failed to load data: ${error.message}</p>`;
   }
 }
 
-// Event Listeners
 document.getElementById('timeRange').addEventListener('change', updateDashboard);
 document.getElementById('advanced').addEventListener('change', updateDashboard);
-document.getElementById('sourceFilter').addEventListener('change', updateDashboard);
-document.getElementById('targetFilter').addEventListener('change', updateDashboard);
 
-// Initial Dashboard Load
 updateDashboard();

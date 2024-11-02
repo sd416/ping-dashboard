@@ -13,13 +13,9 @@ h1 {
   text-align: center;
 }
 
-.controls label {
+label {
   font-weight: bold;
-  margin-right: 5px;
-}
-
-.controls select {
-  margin-right: 15px;
+  margin-right: 10px;
 }
 
 #table-container {
@@ -72,9 +68,3 @@ td.poor {
   margin-top: 20px;
 }
 
-/* Style for multi-select boxes */
-.controls select[multiple] {
-  width: 150px;
-  height: 100px;
-  vertical-align: top;
-}
