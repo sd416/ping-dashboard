@@ -154,10 +154,10 @@ async function updateDashboard() {
   const timeRange = timeRangeSelect.value;
 
   const apiTimeRangeMap = {
-    '3h': '3h',
     '6h': '6h',
+    '12h': '12h',
     '24h': '24h',
-    '7d': '7d'
+    '3d': '3d'
   };
 
   const container = document.getElementById('table-container');
