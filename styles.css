@@ -68,3 +68,37 @@ td.poor {
   margin-top: 20px;
 }
 
+/* Legends Styling */
+.legends {
+  margin-top: 20px;
+  text-align: center;
+}
+
+.legend-item {
+  display: inline-flex;
+  align-items: center;
+  margin: 5px 10px;
+}
+
+.legend-color {
+  width: 20px;
+  height: 20px;
+  border: 1px solid #ccc;
+  margin-right: 5px;
+}
+
+.legend-color.good {
+  background-color: #d4edda;
+}
+
+.legend-color.average {
+  background-color: #fff3cd;
+}
+
+.legend-color.poor {
+  background-color: #f8d7da;
+}
+
+.legend-text {
+  font-size: 14px;
+}
